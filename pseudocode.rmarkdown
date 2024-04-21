@@ -41,7 +41,6 @@ ggplot(medal_analysis, aes(x = noc, y = medal_count))+
 
 ```
 
-
 ```{r}
 #age analysis
 olympic <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-27/olympics.csv")

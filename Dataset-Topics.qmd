@@ -8,6 +8,8 @@ categories: project
 
 [https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-27/olympics.csv]()
 
+
+
 Things you plan to investigate using this dataset:
 
 - Individual country comparison, No. Medals won by each country

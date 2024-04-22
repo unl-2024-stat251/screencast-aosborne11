@@ -118,6 +118,8 @@ print(nrow(male))   #196594
 print(nrow(female))   #74522
 #just showing difference in who has been able to compete historically just that there are 3x the amount of entries for men
 
+#MENS
+#arranging mens data for different sports
 M_cycling <- male[grep("cycling", male$event, ignore.case=TRUE), ]
 M_cycling$sport_id <- "cycling"
 M_running <- male[grep("meter|sprint|dash|kilometer|walk|marathon|relay", male$event, ignore.case=TRUE), ]
@@ -126,27 +128,48 @@ M_team_sports <- male[grep("football|basketball|hockey|volleyball", male$event, 
 M_team_sports$sport_id <- "team_sports"
 M_swimming<- male[grep("swim", male$event, ignore.case=TRUE), ]
 M_swimming$sport_id <- "swimming"
-
-#test <- M_cycling %>% filter(medal== "Gold")
+#Joining all to get a working analysis dataframe
 M_analysis <- full_join(M_cycling, M_running) %>% full_join(M_team_sports) %>% full_join(M_swimming)
+
+#To get an idea of "ideal" physical traits, lets look at only the data of the gold medal winning athletes
 M_gold <- M_analysis %>% filter(medal == "Gold")
 
+
+#Graphing one aspect of each athletes, can be changed easily
 ggplot(M_gold, aes(y = height))+
   geom_density(fill= "darkblue", color = "black", alpha= 0.4)+
   coord_flip()+
   facet_wrap(~sport_id, scales ="free")
 #Could graph any physical trait, and arrange data the same way for women to get the data to see differences in gender
 
-#can find "optimal physical traits" for each gender given different sports and builds, separating by type of sport below
+#WOMENS
+F_cycling <- female[grep("cycling", female$event, ignore.case=TRUE), ]
+F_cycling$sport_id <- "cycling"
+F_running <- female[grep("meter|sprint|dash|kilometer|walk|marathon|relay", female$event, ignore.case=TRUE), ]
+F_running$sport_id <- "running"
+F_team_sports <- female[grep("football|basketball|hockey|volleyball", female$event, ignore.case=TRUE), ]
+F_team_sports$sport_id <- "team_sports"
+F_swimming<- female[grep("swim", female$event, ignore.case=TRUE), ]
+F_swimming$sport_id <- "swimming"
+#Joining all to get a working analysis dataframe
+F_analysis <- full_join(F_cycling, F_running) %>% full_join(F_team_sports) %>% full_join(F_swimming)
 
-#also maybe differentiate between track and field events for string manipulation
-  #ie search the event name for words like meter, sprint, dash, kilometers, walk, marathon, relay
-  #search for swimming, maybe diving
-  #cycling
-  #team sports, football, basketball, hockey
+
+F_gold <- F_analysis %>% filter(medal == "Gold")
+
+ggplot(F_gold, aes(y = height))+
+  geom_density(fill= "darkblue", color = "black", alpha= 0.4)+
+  coord_flip()+
+  facet_wrap(~sport_id, scales ="free")
 
 
-#check individual countries and gender performance, ie graph each countries medals for men and women side by side for comparison
 
-#countries participation by year, like when were women from different countries first winning medals?
+###SIDE BY SIDE analysis
+
+test <- full_join(M_gold, F_gold)
+
+ggplot(test, aes(y=height, group = sex, fill = sex))+
+  geom_density(alpha= 0.4)+
+  coord_flip()+
+  facet_wrap(~sport_id, scales ="free")
 ```

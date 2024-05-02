@@ -1,0 +1,125 @@
+---
+author: "Adam Osborne"
+date: "2024-05-02"
+title: "Project: Screencast"
+output: html
+categories: project
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+
+olympic <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-27/olympics.csv")
+```
+```{r fig.height=20}
+#individual country comparison
+olympic <- na.omit(olympic)
+
+working <- olympic %>% group_by(noc) %>% count(medal)
+
+#reshaping data
+medal_analysis <- working %>% pivot_wider(names_from = medal, values_from = n)
+
+
+medal_analysis[is.na(medal_analysis)] <- 0
+
+medal_analysis$medal_count <- medal_analysis$Bronze + medal_analysis$Silver + medal_analysis$Gold
+
+
+ggplot(medal_analysis, aes(x = noc, y = medal_count))+
+  geom_segment( aes(x = noc, xend = noc, y = 0, yend = medal_count), color = "darkblue")+
+  geom_point(color = "black",  size = 3, alpha = 1)+
+  coord_flip()+
+  theme(axis.text.y = element_text(angle = 25, hjust= 1, size = 8), aspect = 1.5)+
+  labs( x = "Total Medals Won",  y = "Country Abv.")
+```
+```{r}
+olympic <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-27/olympics.csv")
+```
+
+```{r}
+#age analysis
+age_analysis <- olympic %>% group_by(age) %>% count(medal)
+
+age_analysis <- age_analysis %>% pivot_wider(names_from = medal, values_from = n)
+
+age_analysis[is.na(age_analysis)] <- 0 
+age_analysis <- age_analysis[age_analysis$age !=0, ]
+
+
+age_analysis$total_medals <- age_analysis$Bronze + age_analysis$Silver + age_analysis$Gold
+
+#what ages win medals at the highest proportion
+
+medal_proportions <- age_analysis %>% filter(total_medals >25)
+
+medal_proportions$participant_count <- medal_proportions$total_medals + medal_proportions$`NA`
+
+medal_proportions$medaling_proportion <- medal_proportions$total_medals/medal_proportions$participant_count
+
+ggplot(medal_proportions, aes(x= age, y = medaling_proportion))+
+  geom_bar(color = "black", fill = "blue", stat = "identity")
+```
+
+
+
+
+```{r}
+#gender
+male = olympic %>% filter(sex == "M")
+female = olympic %>% filter(sex == "F")
+
+```
+
+```{r}
+M_cycling <- male[grep("cycling", male$event, ignore.case=TRUE), ]
+M_cycling$sport_id <- "cycling"
+M_running <- male[grep("meter|sprint|dash|kilometer|walk|marathon|relay", male$event, ignore.case=TRUE), ]
+M_running$sport_id <- "running"
+M_team_sports <-male[grep("football|basketball|hockey|volleyball", male$event, ignore.case=TRUE), ]
+M_team_sports$sport_id <- "team_sports"
+M_swimming <-male[grep("swimming", male$event, ignore.case=TRUE), ]
+M_swimming$sport_id <- "swimming"
+```
+
+```{r}
+M_analysis <- full_join(M_cycling, M_running) %>% full_join(M_team_sports) %>% full_join(M_swimming)
+
+M_gold <- M_analysis %>% filter(medal == "Gold")
+```
+
+```{r}
+ggplot(M_gold, aes(y=weight))+
+  geom_density(fill = "darkblue", color = "black", alpha = 0.4)+
+  coord_flip()+
+  facet_wrap(~sport_id, scales = "free")
+```
+
+```{r}
+F_cycling <- female[grep("cycling", female$event, ignore.case=TRUE), ]
+F_cycling$sport_id <- "cycling"
+F_running <- female[grep("meter|sprint|dash|kilometer|walk|marathon|relay", female$event, ignore.case=TRUE), ]
+F_running$sport_id <- "running"
+F_team_sports <-female[grep("football|basketball|hockey|volleyball", female$event, ignore.case=TRUE), ]
+F_team_sports$sport_id <- "team_sports"
+F_swimming <-female[grep("swimming", female$event, ignore.case=TRUE), ]
+F_swimming$sport_id <- "swimming"
+```
+
+```{r}
+F_analysis <- full_join(F_cycling, F_running) %>% full_join(F_team_sports) %>% full_join(F_swimming)
+
+F_gold <- F_analysis %>% filter(medal == "Gold")
+```
+
+```{r}
+analysis_df <- full_join(M_gold, F_gold)
+
+ggplot(analysis_df, aes(y=height, group = sex, fill = sex))+
+  geom_density(alpha = 0.4)+
+  coord_flip()+
+  facet_wrap(~sport_id, scales= "free")
+```
